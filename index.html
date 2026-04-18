@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="practiceApp">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocVault — Document Management Portal</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- AngularJS (local — avoids Tracking Prevention blocking CDN) -->
+  <script src="lib/angular.min.js"></script>
+  <script src="lib/angular-route.min.js"></script>
+  <script src="lib/angular-animate.min.js"></script>
+  <script src="lib/angular-sanitize.min.js"></script>
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+
+  <!-- Fallback if AngularJS fails to load -->
+  <div id="angular-loading" style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Inter,sans-serif;color:#9ca3b8;flex-direction:column;gap:16px;">
+    <div style="font-size:1.2rem;">Loading DocVault...</div>
+    <div style="font-size:0.85rem;color:#636b82;">If this message persists, check your browser console (F12) for errors.</div>
+  </div>
+
+  <!-- Top Navbar (shown when logged in) -->
+  <nav class="navbar" ng-cloak ng-if="isLoggedIn()" ng-controller="NavbarController">
+    <div class="navbar-brand">
+      <i class="fas fa-vault"></i>
+      <span>DocVault</span>
+    </div>
+    <div class="navbar-links">
+      <a href="#!/dashboard" ng-class="{ active: isActive('/dashboard') }">
+        <i class="fas fa-chart-pie"></i> Dashboard
+      </a>
+      <a href="#!/upload" ng-class="{ active: isActive('/upload') }">
+        <i class="fas fa-cloud-arrow-up"></i> Upload
+      </a>
+      <a href="#!/documents" ng-class="{ active: isActive('/documents') }">
+        <i class="fas fa-folder-open"></i> Documents
+      </a>
+    </div>
+    <div class="navbar-user">
+      <div class="avatar">{{ currentUser().name.charAt(0).toUpperCase() }}</div>
+      <span class="user-name">{{ currentUser().name }}</span>
+      <button class="btn-logout" ng-click="logout()">
+        <i class="fas fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main View -->
+  <div ng-view ng-cloak class="view-container"></div>
+
+  <!-- Toast Notification -->
+  <div ng-cloak class="toast-container" ng-controller="ToastController">
+    <div class="toast" ng-repeat="t in toasts track by t.id"
+      ng-class="'toast-' + t.type"
+      ng-style="{ 'animation-delay': ($index * 0.1) + 's' }">
+      <i class="fas"
+        ng-class="{ 'fa-circle-check': t.type==='success', 'fa-circle-exclamation': t.type==='error', 'fa-circle-info': t.type==='info' }"></i>
+      <span>{{ t.message }}</span>
+    </div>
+  </div>
+
+  <!-- App Scripts -->
+  <script src="app/app.module.js"></script>
+  <script src="app/app.routes.js"></script>
+  <script src="app/services/auth.service.js"></script>
+  <script src="app/services/file.service.js"></script>
+  <script src="app/services/toast.service.js"></script>
+  <script src="app/controllers/navbar.controller.js"></script>
+  <script src="app/controllers/toast.controller.js"></script>
+  <script src="app/controllers/login.controller.js"></script>
+  <script src="app/controllers/register.controller.js"></script>
+  <script src="app/controllers/dashboard.controller.js"></script>
+  <script src="app/controllers/upload.controller.js"></script>
+  <script src="app/controllers/documents.controller.js"></script>
+  <script src="app/directives/file-upload.directive.js"></script>
+
+  <!-- Hide loading message once Angular bootstraps -->
+  <script>
+    try {
+      angular.element(document).ready(function () {
+        var el = document.getElementById('angular-loading');
+        if (el) el.style.display = 'none';
+      });
+    } catch (e) {
+      console.error('AngularJS failed to load:', e);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,168 @@
+<!-- Upload View -->
+<div class="page-with-nav">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-cloud-arrow-up" style="color:var(--accent);margin-right:10px;"></i>Upload Files</h2>
+      <p>Upload PDF, Excel, or Word files — non-PDF files will be automatically converted</p>
+    </div>
+  </div>
+
+  <!-- Upload Drop Zone -->
+  <div class="upload-zone"
+       ng-click="vm.triggerFileInput()"
+       ng-class="{ 'drag-over': isDragging }"
+       ng-dragover="isDragging = true"
+       ng-dragleave="isDragging = false">
+    <div class="upload-icon">
+      <i class="fas fa-cloud-arrow-up"></i>
+    </div>
+    <h3>Drag & drop files here, or click to browse</h3>
+    <p>Maximum file size: 25 MB per file</p>
+    <div class="supported-formats">
+      <span class="format-badge pdf">PDF</span>
+      <span class="format-badge excel">XLSX</span>
+      <span class="format-badge excel">CSV</span>
+      <span class="format-badge word">DOCX</span>
+      <span class="format-badge word">DOC</span>
+    </div>
+    <input type="file" id="fileInput" multiple
+           accept=".pdf,.xls,.xlsx,.csv,.doc,.docx"
+           file-upload="vm.onFilesSelected(files)" />
+  </div>
+
+  <!-- Pending Files List -->
+  <div class="upload-file-list" ng-if="vm.pendingFiles.length > 0">
+    <h3 class="section-title" style="margin-top:28px;">
+      <i class="fas fa-list-check"></i> Selected Files ({{ vm.pendingFiles.length }})
+    </h3>
+
+    <div class="upload-file-item" ng-repeat="pf in vm.pendingFiles track by $index">
+      <!-- File icon -->
+      <div class="file-icon" ng-class="vm.getFileClass(pf.type)">
+        <i ng-class="vm.getFileIcon(pf.type)"></i>
+      </div>
+
+      <!-- File info -->
+      <div class="file-info">
+        <div class="name">{{ pf.name }}</div>
+        <div class="meta">
+          {{ vm.formatSize(pf.size) }}
+          <span ng-if="pf.type !== 'pdf'" style="color:var(--info);margin-left:6px;">
+            <i class="fas fa-arrows-rotate"></i> Will be converted to PDF
+          </span>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div ng-if="pf.status === 'pending'" style="display:flex;align-items:center;gap:8px;">
+        <button class="btn-icon" ng-click="vm.removeFile($index)" title="Remove">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div ng-if="pf.status === 'uploading'" style="display:flex;align-items:center;gap:12px;">
+        <div class="progress-bar">
+          <div class="progress-bar-fill" ng-style="{ width: pf.progress + '%' }"></div>
+        </div>
+        <span class="file-status uploading">
+          <div class="spinner" style="width:16px;height:16px;border-width:2px;"></div>
+          Uploading...
+        </span>
+      </div>
+
+      <div ng-if="pf.status === 'converting'" style="display:flex;align-items:center;gap:12px;">
+        <div class="progress-bar">
+          <div class="progress-bar-fill" ng-style="{ width: pf.progress + '%' }"></div>
+        </div>
+        <span class="file-status converting">
+          <div class="spinner" style="width:16px;height:16px;border-width:2px;border-top-color:var(--warning);"></div>
+          Converting...
+        </span>
+      </div>
+
+      <div ng-if="pf.status === 'success'">
+        <span class="file-status success">
+          <i class="fas fa-circle-check"></i> Done
+        </span>
+      </div>
+
+      <div ng-if="pf.status === 'error'">
+        <span class="file-status error">
+          <i class="fas fa-circle-exclamation"></i> Failed
+        </span>
+      </div>
+    </div>
+
+    <!-- Upload Button -->
+    <div style="margin-top:20px;display:flex;gap:12px;">
+      <button class="btn btn-primary" ng-click="vm.uploadAll()" ng-disabled="vm.uploading">
+        <span ng-if="!vm.uploading">
+          <i class="fas fa-cloud-arrow-up"></i> Upload All
+        </span>
+        <span ng-if="vm.uploading">
+          <div class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;width:18px;height:18px;border-width:2px;"></div>
+          Processing...
+        </span>
+      </button>
+      <button class="btn btn-secondary" ng-click="vm.pendingFiles = []" ng-disabled="vm.uploading">
+        <i class="fas fa-trash-can"></i> Clear All
+      </button>
+    </div>
+  </div>
+
+  <!-- Response PDF Section -->
+  <div class="response-viewer" ng-if="vm.responsePdf" style="animation: fadeSlideUp 0.4s ease;">
+    <h4>
+      <i class="fas fa-circle-check"></i> Server Response — ResponsePdf
+    </h4>
+    <div class="response-content">
+<strong>Status:</strong>        {{ vm.responsePdf.status }}
+<strong>Message:</strong>       {{ vm.responsePdf.message }}
+<strong>Document ID:</strong>   {{ vm.responsePdf.documentId }}
+<strong>File Name:</strong>     {{ vm.responsePdf.fileName }}
+<strong>Original File:</strong>  {{ vm.responsePdf.originalFileName }}
+<strong>Converted:</strong>     {{ vm.responsePdf.converted ? 'Yes (converted to PDF)' : 'No (native PDF)' }}
+<strong>Uploaded At:</strong>   {{ vm.responsePdf.uploadedAt }}
+<strong>Uploaded By:</strong>   {{ vm.responsePdf.uploadedBy }}
+    </div>
+
+    <div style="margin-top:16px;display:flex;gap:12px;">
+      <a href="#!/documents" class="btn btn-secondary btn-sm">
+        <i class="fas fa-folder-open"></i> View All Documents
+      </a>
+      <button class="btn btn-sm btn-secondary" ng-click="vm.responsePdf = null">
+        <i class="fas fa-xmark"></i> Dismiss
+      </button>
+    </div>
+  </div>
+
+  <!-- Previously Uploaded in this session -->
+  <div ng-if="vm.uploadedFiles.length > 0" style="margin-top:32px;">
+    <h3 class="section-title">
+      <i class="fas fa-clock-rotate-left"></i> Uploaded This Session
+    </h3>
+    <div class="documents-grid">
+      <div class="document-card" ng-repeat="uf in vm.uploadedFiles track by $index">
+        <div class="doc-header">
+          <div class="doc-icon" ng-class="uf.type === 'pdf' ? 'pdf' : 'converted'">
+            <i ng-class="{
+              'fas fa-file-pdf': uf.type === 'pdf',
+              'fas fa-file-excel': uf.type === 'excel',
+              'fas fa-file-word': uf.type === 'word'
+            }"></i>
+          </div>
+          <div>
+            <div class="doc-title">{{ uf.name }}</div>
+            <div class="doc-meta">{{ vm.formatSize(uf.size) }} · {{ uf.responsePdf.status }}</div>
+          </div>
+        </div>
+        <div class="doc-tags">
+          <span class="doc-tag" ng-if="uf.responsePdf.converted">Converted</span>
+          <span class="doc-tag owner-self">My Upload</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,154 @@
+<!-- Documents View — All user documents, searchable & downloadable -->
+<div class="page-with-nav">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-folder-open" style="color:var(--accent);margin-right:10px;"></i>All Documents</h2>
+      <p>Browse, view and download documents from all users</p>
+    </div>
+    <a href="#!/upload" class="btn btn-primary btn-sm">
+      <i class="fas fa-cloud-arrow-up"></i> Upload New
+    </a>
+  </div>
+
+  <!-- Toolbar: Search + Filters -->
+  <div class="documents-toolbar">
+    <div class="search-box">
+      <i class="fas fa-magnifying-glass"></i>
+      <input type="text" ng-model="vm.searchQuery" placeholder="Search by filename or uploader..." />
+    </div>
+    <div class="filter-chips">
+      <span class="filter-chip" ng-class="{ active: vm.activeFilter === 'all' }"
+            ng-click="vm.setFilter('all')">All</span>
+      <span class="filter-chip" ng-class="{ active: vm.activeFilter === 'my' }"
+            ng-click="vm.setFilter('my')">My Uploads</span>
+      <span class="filter-chip" ng-class="{ active: vm.activeFilter === 'pdf' }"
+            ng-click="vm.setFilter('pdf')">PDF</span>
+      <span class="filter-chip" ng-class="{ active: vm.activeFilter === 'converted' }"
+            ng-click="vm.setFilter('converted')">Converted</span>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" ng-if="vm.filteredDocuments.length === 0">
+    <i class="fas fa-box-open"></i>
+    <h3>No documents found</h3>
+    <p ng-if="vm.searchQuery">Try a different search term or clear your filters</p>
+    <p ng-if="!vm.searchQuery">Upload your first file to get started!</p>
+    <a href="#!/upload" class="btn btn-primary btn-sm" style="margin-top:16px;">
+      <i class="fas fa-cloud-arrow-up"></i> Upload File
+    </a>
+  </div>
+
+  <!-- Documents Grid -->
+  <div class="documents-grid" ng-if="vm.filteredDocuments.length > 0">
+    <div class="document-card" ng-repeat="doc in vm.filteredDocuments track by doc.id">
+
+      <!-- Card Header -->
+      <div class="doc-header">
+        <div class="doc-icon" ng-class="doc.converted ? 'converted' : 'pdf'">
+          <i ng-class="{
+            'fas fa-file-pdf': doc.originalType === 'pdf',
+            'fas fa-file-excel': doc.originalType === 'excel',
+            'fas fa-file-word': doc.originalType === 'word'
+          }"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div class="doc-title">{{ doc.originalName }}</div>
+          <div class="doc-meta">
+            {{ vm.formatSize(doc.size) }} · {{ vm.timeAgo(doc.uploadedAt) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="doc-tags">
+        <span class="doc-tag" ng-if="doc.converted" style="border-color:var(--success);color:var(--success);background:var(--success-bg);">
+          <i class="fas fa-arrows-rotate"></i> Converted
+        </span>
+        <span class="doc-tag" ng-if="!doc.converted" style="border-color:var(--error);color:var(--error);background:var(--error-bg);">
+          <i class="fas fa-file-pdf"></i> Native PDF
+        </span>
+        <span class="doc-tag owner-self" ng-if="vm.isOwner(doc)">
+          <i class="fas fa-user"></i> Mine
+        </span>
+      </div>
+
+      <!-- Footer -->
+      <div class="doc-footer">
+        <div class="doc-uploader">
+          <div class="mini-avatar">{{ doc.uploadedBy.name.charAt(0).toUpperCase() }}</div>
+          <span>{{ doc.uploadedBy.name }}</span>
+        </div>
+        <div class="doc-actions">
+          <button class="btn-icon" title="View Document" ng-click="vm.viewDocument(doc)">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="btn-icon" title="Download PDF" ng-click="vm.downloadDocument(doc)">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document Preview Modal -->
+  <div class="modal-overlay" ng-if="vm.showPreview" ng-click="vm.closePreview()">
+    <div class="modal-card" ng-click="$event.stopPropagation()" style="max-width:750px;">
+      
+      <!-- Modal Header -->
+      <h3>
+        <i class="fas fa-eye"></i> Document Preview
+        <button class="btn-icon" style="margin-left:auto;" ng-click="vm.closePreview()" title="Close">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </h3>
+
+      <!-- Doc Info -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:16px;background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border-color)">
+        <div class="doc-icon" ng-class="vm.previewDoc.converted ? 'converted' : 'pdf'" style="width:48px;height:48px;flex-shrink:0;">
+          <i ng-class="{
+            'fas fa-file-pdf': vm.previewDoc.originalType === 'pdf',
+            'fas fa-file-excel': vm.previewDoc.originalType === 'excel',
+            'fas fa-file-word': vm.previewDoc.originalType === 'word'
+          }" style="font-size:1.3rem;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:0.95rem;">{{ vm.previewDoc.originalName }}</div>
+          <div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;">
+            Uploaded by <strong style="color:var(--text-secondary);">{{ vm.previewDoc.uploadedBy.name }}</strong>
+            · {{ vm.formatSize(vm.previewDoc.size) }}
+            · {{ vm.timeAgo(vm.previewDoc.uploadedAt) }}
+          </div>
+        </div>
+        <button class="btn btn-success btn-sm" ng-click="vm.downloadDocument(vm.previewDoc)">
+          <i class="fas fa-download"></i> Download
+        </button>
+      </div>
+
+      <!-- PDF Embed -->
+      <div style="border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border-color);">
+        <iframe ng-src="{{ vm.previewDoc.downloadUrl }}"
+                style="width:100%;height:450px;border:none;background:#fff;"
+                title="PDF Preview">
+        </iframe>
+      </div>
+
+      <!-- Response Info -->
+      <div class="response-viewer" style="margin-top:16px;">
+        <h4><i class="fas fa-server"></i> ResponsePdf Details</h4>
+        <div class="response-content" style="max-height:200px;">
+<strong>Document ID:</strong>    {{ vm.previewDoc.id }}
+<strong>PDF Name:</strong>       {{ vm.previewDoc.pdfName }}
+<strong>Original Name:</strong>  {{ vm.previewDoc.originalName }}
+<strong>Type:</strong>           {{ vm.previewDoc.originalType | uppercase }}
+<strong>Converted:</strong>      {{ vm.previewDoc.converted ? 'Yes' : 'No' }}
+<strong>File Size:</strong>      {{ vm.formatSize(vm.previewDoc.size) }}
+<strong>Uploaded By:</strong>    {{ vm.previewDoc.uploadedBy.name }} ({{ vm.previewDoc.uploadedBy.email }})
+<strong>Uploaded At:</strong>    {{ vm.previewDoc.uploadedAt }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

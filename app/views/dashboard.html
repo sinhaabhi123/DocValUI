@@ -1,0 +1,117 @@
+<!-- Dashboard View -->
+<div class="page-with-nav">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Welcome back, {{ vm.user.name }}!</h2>
+      <p>Here's what's happening with your documents</p>
+    </div>
+    <a href="#!/upload" class="btn btn-primary">
+      <i class="fas fa-cloud-arrow-up"></i> Upload File
+    </a>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card purple">
+      <div class="icon-box">
+        <i class="fas fa-file-lines"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ vm.stats.totalDocuments }}</h3>
+        <p>Total Documents</p>
+      </div>
+    </div>
+
+    <div class="stat-card green">
+      <div class="icon-box">
+        <i class="fas fa-folder-open"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ vm.stats.myDocuments }}</h3>
+        <p>My Uploads</p>
+      </div>
+    </div>
+
+    <div class="stat-card blue">
+      <div class="icon-box">
+        <i class="fas fa-arrows-rotate"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ vm.stats.converted }}</h3>
+        <p>Converted to PDF</p>
+      </div>
+    </div>
+
+    <div class="stat-card yellow">
+      <div class="icon-box">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ vm.stats.uniqueUsers }}</h3>
+        <p>Contributors</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two Column: Recent Docs + Activity -->
+  <div class="two-columns">
+
+    <!-- Recent Documents -->
+    <div class="card-panel">
+      <h3 class="section-title">
+        <i class="fas fa-clock-rotate-left"></i> Recent Documents
+      </h3>
+
+      <div ng-if="vm.recentDocs.length === 0" class="empty-state" style="padding:32px 16px;">
+        <i class="fas fa-inbox"></i>
+        <h3>No documents yet</h3>
+        <p>Upload your first PDF, Excel, or Word file</p>
+      </div>
+
+      <div class="activity-list" ng-if="vm.recentDocs.length > 0">
+        <div class="activity-item" ng-repeat="doc in vm.recentDocs">
+          <div class="activity-icon" ng-class="doc.converted ? 'convert' : 'upload'">
+            <i ng-class="doc.converted ? 'fas fa-arrows-rotate' : 'fas fa-file-pdf'"></i>
+          </div>
+          <div class="activity-text">
+            <strong>{{ doc.originalName }}</strong><br />
+            <span style="font-size:0.78rem;color:var(--text-muted);">
+              by {{ doc.uploadedBy.name }} · {{ vm.formatSize(doc.size) }}
+            </span>
+          </div>
+          <span class="activity-time">{{ vm.timeAgo(doc.uploadedAt) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card-panel">
+      <h3 class="section-title">
+        <i class="fas fa-bolt"></i> Recent Activity
+      </h3>
+
+      <div ng-if="vm.recentActivity.length === 0" class="empty-state" style="padding:32px 16px;">
+        <i class="fas fa-chart-line"></i>
+        <h3>No activity yet</h3>
+        <p>Activity will appear here when users upload or download files</p>
+      </div>
+
+      <div class="activity-list" ng-if="vm.recentActivity.length > 0">
+        <div class="activity-item" ng-repeat="a in vm.recentActivity">
+          <div class="activity-icon" ng-class="a.icon">
+            <i ng-class="{
+              'fas fa-cloud-arrow-up': a.icon === 'upload',
+              'fas fa-arrows-rotate': a.icon === 'convert',
+              'fas fa-download': a.icon === 'download'
+            }"></i>
+          </div>
+          <div class="activity-text">{{ a.plainText || a.text }}</div>
+          <span class="activity-time">{{ vm.timeAgo(a.timestamp) }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

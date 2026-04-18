@@ -1,0 +1,63 @@
+<!-- Register View -->
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="logo">
+      <i class="fas fa-vault"></i>
+      <h1>DocVault</h1>
+      <p>Create your free account</p>
+    </div>
+
+    <form ng-submit="vm.register()" novalidate>
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <div class="input-wrapper">
+          <i class="fas fa-user"></i>
+          <input type="text" id="name" ng-model="vm.name"
+                 placeholder="John Doe" autocomplete="name" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="regEmail">Email Address</label>
+        <div class="input-wrapper">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="regEmail" ng-model="vm.email"
+                 placeholder="you@example.com" autocomplete="email" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="regPassword">Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="regPassword" ng-model="vm.password"
+                 placeholder="Min. 4 characters" autocomplete="new-password" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="confirmPassword" ng-model="vm.confirmPassword"
+                 placeholder="Re-enter password" autocomplete="new-password" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block"
+              ng-disabled="vm.loading">
+        <span ng-if="!vm.loading">
+          <i class="fas fa-user-plus"></i> Create Account
+        </span>
+        <span ng-if="vm.loading">
+          <div class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></div>
+          Creating account...
+        </span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="#!/login">Sign in</a>
+    </div>
+  </div>
+</div>
